@@ -1,0 +1,15 @@
+# Local development profile - use -Dspring.profiles.active=dev
+# Do NOT use this profile in production.
+jwt:
+  secret: ${JWT_SECRET:dev-only-secret-min-32-chars-for-local-run}
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+logging:
+  level:
+    com.booking: DEBUG
+    org.hibernate.SQL: DEBUG

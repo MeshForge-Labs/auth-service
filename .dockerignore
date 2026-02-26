@@ -1,0 +1,41 @@
+# Build output
+target/
+build/
+*.jar
+*.war
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Docs and local
+README.md
+*.md
+.env
+.env.*
+!.env.example
+
+# Test and coverage
+*.log
+coverage/
+.nyc_output/
+.gradle/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kubernetes (not needed inside image)
+k8s/
+*.yaml
+!src/**/*.yaml
+
