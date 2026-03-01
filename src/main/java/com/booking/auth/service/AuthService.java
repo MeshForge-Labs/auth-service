@@ -25,16 +25,18 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    @Transactional(readOnly = true)
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             log.warn("Registration attempted for existing email: {}", request.getEmail());
             throw new ResourceConflictException("User already exists with this email");
         }
+        String roleAuthority = "ADMIN".equalsIgnoreCase(request.getRole())
+                ? Role.ADMIN.getAuthority()
+                : Role.USER.getAuthority();
         User user = User.builder()
                 .email(request.getEmail().trim().toLowerCase())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .roles(Set.of(Role.USER.getAuthority()))
+                .roles(Set.of(roleAuthority))
                 .enabled(true)
                 .build();
         user = userRepository.save(user);
