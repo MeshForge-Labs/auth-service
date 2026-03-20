@@ -19,7 +19,10 @@ public class DatabaseReadinessIndicator implements HealthIndicator {
     public DatabaseReadinessIndicator(DataSource dataSource) {
         this.dataSource = dataSource;
     }
-
+/**
+ * Checks if the database is reachable.
+ * @return Health object with the database status.
+ */
     @Override
     public Health health() {
         try (Connection conn = dataSource.getConnection()) {
