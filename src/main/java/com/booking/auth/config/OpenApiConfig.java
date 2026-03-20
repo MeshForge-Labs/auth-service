@@ -12,6 +12,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
+    /**
+     * Configures the OpenAPI documentation.
+     * @return OpenAPI object with the documentation.
+     */
     @Bean
     public OpenAPI openAPI() {
         final String securitySchemeName = "bearerAuth";
