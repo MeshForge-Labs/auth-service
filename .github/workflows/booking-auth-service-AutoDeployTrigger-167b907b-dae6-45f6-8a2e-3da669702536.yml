@@ -11,21 +11,22 @@ on:
     - '.github/workflows/booking-auth-service-AutoDeployTrigger-167b907b-dae6-45f6-8a2e-3da669702536.yml'
 
   # Allow manual trigger 
-  workflow_dispatch:      
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # Required for OIDC (azure/login federated token)
+  contents: read
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions: 
-      id-token: write #This is required for requesting the OIDC JWT Token
-      contents: read #Required when GH token is used to authenticate with private repo
 
     steps:
       - name: Checkout to the branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Azure Login
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.BOOKINGAUTHSERVICE_AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.BOOKINGAUTHSERVICE_AZURE_TENANT_ID }}
