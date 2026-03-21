@@ -1,0 +1,192 @@
+openapi: 3.0.3
+info:
+  title: Auth Service API
+  version: 1.0.0
+  description: |
+    Authentication, JWT issuance, and token validation.
+    **Live docs:** Swagger UI at `/swagger-ui.html`, OpenAPI JSON at `/v3/api-docs` (Springdoc).
+servers:
+  - url: /
+    description: Service root
+tags:
+  - name: Auth
+    description: Authentication and token validation
+  - name: Health
+    description: Liveness and readiness
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          maxLength: 100
+        role:
+          type: string
+          enum: [USER, ADMIN]
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          type: string
+        expiresInMs:
+          type: integer
+          format: int64
+        email:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+    ValidateResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        subject:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+paths:
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error
+        '409':
+          description: User already exists
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login and get JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid credentials
+  /api/auth/validate:
+    get:
+      tags: [Auth]
+      summary: Validate JWT and return subject and roles
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+            description: Bearer token
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateResponse'
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user (authenticated)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateResponse'
+        '401':
+          description: Not authenticated
+  /api/auth/admin:
+    get:
+      tags: [Auth]
+      summary: Admin-only endpoint
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Admin access granted
+          content:
+            text/plain:
+              schema:
+                type: string
+        '403':
+          description: Insufficient role
+  /health:
+    get:
+      tags: [Health]
+      summary: Liveness
+      responses:
+        '200':
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: UP
+                  service:
+                    type: string
+                    example: auth-service
+                  timestamp:
+                    type: string
+                    format: date-time
+  /health/ready:
+    get:
+      tags: [Health]
+      summary: Readiness (database)
+      responses:
+        '200':
+          description: Database reachable
+        '503':
+          description: Database unreachable
